@@ -92,11 +92,11 @@ export const handleGetPlatforms: RequestHandler = async (_req, res) => {
 
     const response: PlatformResponse = {
       platforms: dynamicPlatforms,
-      weather: weatherData ? {
-        temp: Math.round(weatherData.main.temp - 273.15) * 9/5 + 32, // Convert Kelvin to F
-        condition: weatherData.weather[0].main,
-        description: weatherData.weather[0].description,
-        icon: weatherData.weather[0].icon,
+      weather: weatherData && weatherData.main && weatherData.weather?.[0] ? {
+        temp: Math.round((weatherData.main.temp - 273.15) * 9/5 + 32),
+        condition: weatherData.weather[0].main || "Clear",
+        description: weatherData.weather[0].description || "clear sky",
+        icon: weatherData.weather[0].icon || "01d",
         multiplier: weatherMultiplier
       } : null
     };
