@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { PlatformData, MOCK_PLATFORMS } from "@shared/api";
+import { PlatformData, MOCK_PLATFORMS } from "../../shared/api";
 
 const QUINCY_ZIP = "62301";
 const API_KEY = process.env.VITE_OPENWEATHER_API_KEY;
