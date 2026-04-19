@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Clock, MapPin, Zap, ArrowRight, RefreshCcw, Loader2 } from "lucide-react";
-import { PlatformData } from "@shared/api";
+import { TrendingUp, Clock, MapPin, Zap, ArrowRight, RefreshCcw, Loader2, CloudRain, Sun, Cloud, Thermometer } from "lucide-react";
+import { PlatformResponse } from "@shared/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -11,7 +11,7 @@ export default function Index() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data: platforms, isLoading, isError, refetch, isRefetching } = useQuery<PlatformData[]>({
+  const { data: response, isLoading, isError, refetch, isRefetching } = useQuery<PlatformResponse>({
     queryKey: ["/api/platforms"],
     queryFn: async () => {
       const response = await fetch("/api/platforms");
@@ -20,8 +20,11 @@ export default function Index() {
     },
   });
 
-  const peakPlatform = platforms?.find(p => p.status === 'peak') || platforms?.[0];
-  const selectedPlatform = platforms?.find(p => p.id === selectedId) || peakPlatform;
+  const platforms = response?.platforms || [];
+  const weather = response?.weather;
+  
+  const peakPlatform = platforms.find(p => p.status === 'peak') || platforms[0];
+  const selectedPlatform = platforms.find(p => p.id === selectedId) || peakPlatform;
 
   // Update clock every minute
   useEffect(() => {
@@ -59,7 +62,7 @@ export default function Index() {
     );
   }
 
-  if (isError || !platforms) {
+  if (isError || !platforms.length) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center gap-4 bg-background p-4 text-center">
         <div className="rounded-full bg-destructive/10 p-4">
@@ -93,14 +96,35 @@ export default function Index() {
                 </p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="flex flex-col items-end gap-1">
               <p className="text-sm font-semibold text-primary">{getTimeOfDay()}</p>
-              <div className="flex items-center justify-end gap-2 text-xs font-mono text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                {currentTime.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+              
+              <div className="flex items-center gap-3">
+                {weather && (
+                  <Badge variant="outline" className="flex items-center gap-1.5 border-primary/30 bg-primary/5 px-2 py-0.5 text-[10px] font-bold text-primary">
+                    {weather.condition.toLowerCase().includes('rain') ? (
+                      <CloudRain className="h-3 w-3" />
+                    ) : weather.condition.toLowerCase().includes('cloud') ? (
+                      <Cloud className="h-3 w-3" />
+                    ) : (
+                      <Sun className="h-3 w-3" />
+                    )}
+                    {weather.temp}°F
+                    {weather.multiplier > 1 && (
+                      <span className="ml-1 rounded-sm bg-primary px-1 py-[1px] text-[8px] text-primary-foreground">
+                        +{Math.round((weather.multiplier - 1) * 100)}% Boost
+                      </span>
+                    )}
+                  </Badge>
+                )}
+                
+                <div className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  {currentTime.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
               </div>
             </div>
           </div>

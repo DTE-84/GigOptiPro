@@ -18,6 +18,19 @@ export interface PlatformData {
   status: 'peak' | 'normal' | 'low';
 }
 
+export interface WeatherInfo {
+  temp: number;
+  condition: string;
+  description: string;
+  icon: string;
+  multiplier: number;
+}
+
+export interface PlatformResponse {
+  platforms: PlatformData[];
+  weather: WeatherInfo | null;
+}
+
 export const MOCK_PLATFORMS: PlatformData[] = [
   {
     id: "doordash",

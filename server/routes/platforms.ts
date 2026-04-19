@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { PlatformData, MOCK_PLATFORMS } from "../../shared/api";
+import { PlatformData, MOCK_PLATFORMS, PlatformResponse } from "../../shared/api";
 
 const QUINCY_ZIP = "62301";
 const API_KEY = process.env.VITE_OPENWEATHER_API_KEY;
@@ -89,7 +89,19 @@ export const handleGetPlatforms: RequestHandler = async (_req, res) => {
     });
 
     dynamicPlatforms.sort((a, b) => b.currentEarnings - a.currentEarnings);
-    res.json(dynamicPlatforms);
+
+    const response: PlatformResponse = {
+      platforms: dynamicPlatforms,
+      weather: weatherData ? {
+        temp: Math.round(weatherData.main.temp - 273.15) * 9/5 + 32, // Convert Kelvin to F
+        condition: weatherData.weather[0].main,
+        description: weatherData.weather[0].description,
+        icon: weatherData.weather[0].icon,
+        multiplier: weatherMultiplier
+      } : null
+    };
+
+    res.json(response);
   } catch (error) {
     console.error("Critical Platform Route Error:", error);
     res.status(500).json({ 
